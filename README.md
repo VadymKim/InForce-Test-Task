@@ -1,5 +1,5 @@
 # InForce-Test-Task
-This repo is implementation of test task for AQA candidates
+
 
 How to install:
 
