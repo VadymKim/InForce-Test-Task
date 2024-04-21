@@ -1,0 +1,9 @@
+{
+    "commonUser": {
+        "userName": "standard_user",
+        "password": "secret_sauce",
+        "firstName": "John",
+        "lastName": "Dou",
+        "zipCode": "11111"
+    }
+}
