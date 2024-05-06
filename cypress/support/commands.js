@@ -25,6 +25,7 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 import ProductsPage from "./pages/products.page";
 import ProductCardFragmet from "./fragments/productCard.fragment";
+import HeaderFragment from "./fragments/header.fragment";
 
 Cypress.Commands.add('addItemsToCart', (amount) => { 
     const productsPage = new ProductsPage();
@@ -35,11 +36,37 @@ Cypress.Commands.add('addItemsToCart', (amount) => {
                 const productCard = new ProductCardFragmet(product);
 
                 productCard.getProductInfo().then((productInfo) => {
-                    console.log(productInfo);
                     Cypress.env(`item${i+1}`, productInfo);
                 });
-                productCard.addToCartButton().click();
+                productCard.addProductToCart();
             })
         }
     })
 })
+
+Cypress.Commands.add('goToCart', () => {
+    const header = new HeaderFragment();
+
+    header.cartLink().click();
+});
+
+Cypress.Commands.add('checkItems', ($items) => {
+    $items.each((indx, item) => {
+        const productCard = new ProductCardFragmet(item);
+
+        cy.wrap(Cypress.env(`item${indx+1}`)).as('productInfo');
+        cy.get('@productInfo').then((product) => {
+            cy.wrap(productCard.getProductInfo()).then((checkoutItem) => {
+                expect(checkoutItem.name).to.eq(product.name);
+                expect(checkoutItem.description).to.eq(product.description);
+                expect(checkoutItem.price).to.eq(product.price);
+            });
+            });    
+    });
+});
+
+
+
+
+
+

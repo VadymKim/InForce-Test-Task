@@ -1,7 +1,7 @@
 import AbstractPage from "./abstract.page";
 import { commonUser } from "../../fixtures/usersData.json";
 
-class CheckoutPage1 extends AbstractPage {
+export class CheckoutStep1Page extends AbstractPage {
     constructor() {
         super('/checkout-step-one.html');
     };
@@ -15,6 +15,6 @@ class CheckoutPage1 extends AbstractPage {
         this.lastNameInput().type(commonUser.lastName);
         this.zipCode().type(commonUser.zipCode);
     };
+    goToStep2 = () => this.continueButton().click();
 };
 
-export default CheckoutPage1

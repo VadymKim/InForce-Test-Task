@@ -16,7 +16,9 @@ class ProductCardFragmet {
         this.getWrapper().find('[data-test = "inventory-item-price"]').invoke('text').as('price');
     };
     
-    addToCartButton = () => cy.get('button[data-test *="add-to-cart"]');
+    addProductToCart = () => {
+        cy.get('button[data-test *="add-to-cart"]').click();
+    }
 
     getProductInfo = () => {
         const productInfo = {};

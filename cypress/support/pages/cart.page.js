@@ -9,7 +9,6 @@ class CartPage extends AbstractPage {
     items = () => cy.get('[data-test = "inventory-item"]');
     checkoutButton = () => cy.get('[data-test = "checkout"]');
     checkItemsbyName = (namesObject) => {
-        console.log('itemName1' in namesObject);
         const namesLength = Object.getOwnPropertyNames(namesObject);
         const namesArray = Object.values(namesObject);
 
@@ -23,6 +22,13 @@ class CartPage extends AbstractPage {
             });
         })    
     }
+  
+    goToCheckout = () => this.checkoutButton().click();
+    checkItems = () => {
+        this.items().then(($items) => {
+            cy.checkItems($items);
+        });
+    };
 }
 
 export default CartPage;

@@ -1,9 +1,8 @@
 import LoginPage from "../support/pages/login.page";
 import ProductsPage from "../support/pages/products.page";
-import { checkItems } from "../support/helpers/checkItems";
 import { checkTotalPrice } from "../support/helpers/checkTotalPrice";
-import CheckoutPage1 from "../support/pages/checkout1.page";
-import CheckoutPage2 from "../support/pages/checkout2.page";
+import { CheckoutStep1Page } from "../support/pages/checkoutStep1.page";
+import { CheckoutStep2Page } from "../support/pages/checkoutStep2.page";
 import CheckoutCompletePage from "../support/pages/checkoutComplete.page";
 import DrawerMenu from "../support/fragments/drawerMenu.fragment";
 import HeaderFragment from "../support/fragments/header.fragment";
@@ -14,12 +13,12 @@ describe('verifying a checkout', () => {
     const loginPage = new LoginPage();
     const productsPage = new ProductsPage();
     const cartPage = new CartPage();
-    const checkoutPage1 = new CheckoutPage1();
-    const checkoutPage2 = new CheckoutPage2();
+    const checkoutStep1 = new CheckoutStep1Page();
+    const checkoutStep2 = new CheckoutStep2Page();
     const checkoutCompletePage = new CheckoutCompletePage();
     const userName = commonUser.userName;
     const password = commonUser.password;
-    const amount = 2;
+    const numberOfProducts = 2;
 
     beforeEach(() => {
         cy.intercept('/service-worker.js', {
@@ -29,17 +28,13 @@ describe('verifying a checkout', () => {
 
     it('a user can proceed to checkout', () => {
         loginPage.login(userName, password);
-        cy.addItemsToCart(amount);
-        productsPage.cartIcon().click();
-        cartPage.items().then(($items) => {
-            checkItems($items);
-        })
-        cartPage.checkoutButton().click();
-        checkoutPage1.fillFormWithTestDate();
-        checkoutPage1.continueButton().click();
-        checkoutPage2.items().then(($items) => {
-            checkItems($items);
-        })
+        cy.addItemsToCart(numberOfProducts);
+        cy.goToCart();
+        cartPage.checkItems();
+        cartPage.goToCheckout();
+        checkoutStep1.fillFormWithTestDate();
+        checkoutStep1.goToStep2();
+        checkoutStep2.checkItems();
     });
 
     it('checks pre-filling Your information based on the logged-in user', () => {
@@ -50,74 +45,54 @@ describe('verifying a checkout', () => {
         const zipCode = commonUser.zipCode;
 
         loginPage.login(userName, password);
-        productsPage.cartIcon().click();
-        cartPage.checkoutButton().click();
+        cy.goToCart();
+        cartPage.goToCheckout();
         // You can take away comment from the line bellow to make the test pass
         //checkoutPage1.fillFormWithTestDate();
-        checkoutPage1.firstNameInput().should('have.value', firstName);
-        checkoutPage1.lastNameInput().should('have.value', lastName);
-        checkoutPage1.zipCode().should('have.value', zipCode);
-
+        checkoutStep1.firstNameInput().should('have.value', firstName);
+        checkoutStep1.lastNameInput().should('have.value', lastName);
+        checkoutStep1.zipCode().should('have.value', zipCode);
     });
 
     it('a user can make the checkout', () => {
         loginPage.login(userName, password);
-        cy.addItemsToCart(amount);
-        productsPage.cartIcon().click();
-        cartPage.checkoutButton().click();
-        checkoutPage1.fillFormWithTestDate();
-        checkoutPage1.continueButton().click();
-        checkoutPage2.title().invoke('text').should('contains', 'Checkout: Overview');
-        checkoutPage2.cardQuantityLabel().should('be.visible');
-        checkoutPage2.paymentInfoLabel().should('be.visible');
-        checkoutPage2.paymentInfoValue().should('be.visible');
-        checkoutPage2.shippingInfoLabel().should('be.visible');
-        checkoutPage2.shippingInfoValue().should('be.visible');
-        checkoutPage2.subtotalLabel().should('be.visible');
-        checkoutPage2.tax().should('be.visible');
-        checkoutPage2.items().then(($items) => {
-            checkItems($items);
-            checkTotalPrice();
-        })
+        cy.addItemsToCart(numberOfProducts);
+        cy.goToCart();
+        cartPage.goToCheckout();
+        checkoutStep1.fillFormWithTestDate();
+        checkoutStep1.goToStep2();
+        checkoutStep2.checkIfLoaded();
+        checkoutStep2.checkItems();
+        checkTotalPrice();
     });
 
     it('a user can submit a checkout', () => {
-        const successMessageText = "Your order has been dispatched," +
-                                   " and will arrive just as fast as" +
-                                   " the pony can get there!"
-        
         loginPage.login(userName, password);
-        cy.addItemsToCart(amount);
-        productsPage.cartIcon().click();
-        cartPage.checkoutButton().click();
-        checkoutPage1.fillFormWithTestDate();
-        checkoutPage1.continueButton().click();
-        checkoutPage2.title().invoke('text').should('contains', 'Checkout: Overview');
-        checkoutPage2.finishButton().click();
-        checkoutCompletePage.title().invoke('text').should('contains', 'Checkout: Complete!');
-        checkoutCompletePage.message()
-                            .should('be.visible')
-                            .and('have.text', successMessageText);
+        cy.addItemsToCart(numberOfProducts);
+        cy.goToCart();
+        cartPage.goToCheckout();
+        checkoutStep1.fillFormWithTestDate();
+        checkoutStep1.goToStep2();
+        checkoutStep2.checkIfLoaded();
+        checkoutStep2.finishCheckout();
+        checkoutCompletePage.checkIfLoaded();
+        checkoutCompletePage.checkSuccessMessage();
     });
 
-    it('a user can log out after a checkout completion', () => {
+    it('a user can log out after checkout completion', () => {
         const header = new HeaderFragment();
         const drawerMenu = new DrawerMenu();
 
         loginPage.login(userName, password);
-        productsPage.cartIcon().click();
-        cartPage.checkoutButton().click();
-        checkoutPage1.fillFormWithTestDate();
-        checkoutPage1.continueButton().click();
-        checkoutPage2.finishButton().click();
-        checkoutCompletePage.backHomeButton().click();
-        productsPage.title().should('be.visible');
-        header.menuIcon().scrollIntoView().click({ force: true });
-        drawerMenu.logoutItem().click();
-        cy.url().then(($url) => {
-            expect($url).to.eq(loginPage.getUrl() + "/");
-        })
-        cy.get('form').find('[data-test = "login-button"]').should('be.visible');
+        cy.goToCart();
+        cartPage.goToCheckout();
+        checkoutStep1.fillFormWithTestDate();
+        checkoutStep1.goToStep2();
+        checkoutStep2.finishCheckout();
+        checkoutCompletePage.goHome();
+        header.openMenu();
+        drawerMenu.logout();
+        loginPage.checkIfLoaded();
     });
 });
 

@@ -1,6 +1,6 @@
 import AbstractPage from "./abstract.page";
 
-class CheckoutPage2 extends AbstractPage {
+export class CheckoutStep2Page extends AbstractPage {
     constructor() {
         super('/checkout-step-two.html');
     };
@@ -19,6 +19,21 @@ class CheckoutPage2 extends AbstractPage {
     tax = () => cy.get('[data-test = "tax-label"]');
     cancelButton = () => cy.get('[data-test = "cancel"]');
     finishButton = () => cy.get('[data-test = "finish"]');
+    checkItems = () => {
+        this.items().then(($items) => {
+            cy.checkItems($items);
+        });
+    };
+    checkIfLoaded = () => {
+        this.title().invoke('text').should('contains', 'Checkout: Overview');
+        this.cardQuantityLabel().should('be.visible');
+        this.paymentInfoLabel().should('be.visible');
+        this.paymentInfoValue().should('be.visible');
+        this.shippingInfoLabel().should('be.visible');
+        this.shippingInfoValue().should('be.visible');
+        this.subtotalLabel().should('be.visible');
+        this.tax().should('be.visible');
+    };
+    finishCheckout = () => this.finishButton().click();
 };
 
-export default CheckoutPage2;

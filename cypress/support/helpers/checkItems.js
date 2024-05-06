@@ -1,6 +1,6 @@
 import ProductCardFragmet from "../fragments/productCard.fragment";
 
-export function checkItems($items, criteria) {
+export function checkItems($items) {
     
     $items.each((indx, item) => {
         const productCard = new ProductCardFragmet(item);

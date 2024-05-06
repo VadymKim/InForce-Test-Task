@@ -17,6 +17,12 @@ class LoginPage extends AbstractPage {
         this.passwordInput().type(password);
         this.loginButton().click();
     };
+    checkIfLoaded = () => {
+        cy.url().then(($url) => {
+            expect($url).to.eq(loginPage.getUrl() + "/");
+        })
+        cy.get('form').find('[data-test = "login-button"]').should('be.visible');
+    };
 };
 
 export default LoginPage;

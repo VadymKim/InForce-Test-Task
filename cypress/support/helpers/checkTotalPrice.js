@@ -1,4 +1,4 @@
-import CheckoutPage2 from "../pages/checkout2.page";
+import CheckoutPage2 from "../pages/checkoutStep2.page";
 
 export function checkTotalPrice() {
     
